@@ -17,27 +17,30 @@ struct PLUGIN_INFO {
   const wchar_t* pwzDescription;
   PFN_PLUGIN_INIT pfnInit;
 };
-typedef bool(__cdecl* PFN_GETPLUGININFO)(PLUGIN_INFO*);
+typedef void(__cdecl* PFN_GETPLUGININFO)(PLUGIN_INFO*);
 
 std::unordered_map<std::wstring, PLUGIN_INFO> _plugins;
 
 VOID NTAPI ApcLoadPlugins(ULONG_PTR Parameter) {
   WIN32_FIND_DATAW findFileData;
-  const auto fileName = fs::current_path().append(xorstr_("plugins\\*.dll"));
-  auto hFindFile = FindFirstFileW(fileName.c_str(), &findFileData);
+  const auto folder = fs::path(pe::get_module()->full_name()).remove_filename().append(xorstr_(L"plugins"));
+  const auto filter = folder / xorstr_(L"*.dll");
+  auto hFindFile = FindFirstFileW(filter.c_str(), &findFileData);
   if (hFindFile) {
     do {
       PLUGIN_INFO pluginInfo;
       memset(&pluginInfo, 0, sizeof pluginInfo);
 
-      auto hModule = LoadLibraryExW(findFileData.cFileName, nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
+      const auto path = folder / findFileData.cFileName;
+      auto hModule = LoadLibraryExW(path.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
       if (!hModule)
         continue;
       auto pfnGetPluginInfo = (PFN_GETPLUGININFO)GetProcAddress(hModule, xorstr_("GetPluginInfo"));
-      if (!pfnGetPluginInfo || !pfnGetPluginInfo(&pluginInfo)) {
+      if (!pfnGetPluginInfo) {
         FreeLibrary(hModule);
         continue;
       }
+      pfnGetPluginInfo(&pluginInfo);
       if (pluginInfo.pfnInit)
         pluginInfo.pfnInit();
       _plugins[findFileData.cFileName] = pluginInfo;
