@@ -3,6 +3,8 @@
 #include <pe/module.h>
 #include <pe/export_directory.h>
 #include <xorstr.hpp>
+#include <wil/win32_helpers.h>
+#include <wil/stl.h>
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -58,14 +60,14 @@ ExternC const PfnDliHook __pfnDliNotifyHook2 = [](unsigned dliNotify, PDelayLoad
 
   switch (dliNotify) {
     case dliNotePreLoadLibrary: {
-      wchar_t buffer[MAX_PATH];
-
       NtTestAlert();
       const auto module = pe::instance_module();
-      if (!_stricmp(pdli->szDll, module->export_directory()->name())
-        && GetSystemDirectoryW(buffer, _countof(buffer))) {
-        const auto path = fs::path(buffer).append(pdli->szDll);
-        return (FARPROC)LoadLibraryExW(path.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
+      if (!_stricmp(pdli->szDll, module->export_directory()->name())) {
+        std::wstring result;
+        if (SUCCEEDED(wil::GetSystemDirectoryW(result))) {
+          const auto path = fs::path(result).append(pdli->szDll);
+          return (FARPROC)LoadLibraryExW(path.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
+        }
       }
       break;
     }
