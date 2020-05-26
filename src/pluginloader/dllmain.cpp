@@ -58,7 +58,7 @@ ExternC const PfnDliHook __pfnDliNotifyHook2 = [](unsigned dliNotify, PDelayLoad
 
   switch (dliNotify) {
     case dliNotePreLoadLibrary: {
-      wchar_t buffer[_MAX_PATH];
+      wchar_t buffer[MAX_PATH];
 
       NtTestAlert();
       const auto module = pe::instance_module();
