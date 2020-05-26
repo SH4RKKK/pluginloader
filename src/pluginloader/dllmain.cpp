@@ -2,9 +2,9 @@
 #include <delayimp.h>
 #include <pe/module.h>
 #include <pe/export_directory.h>
-#include <xorstr.hpp>
-#include <wil/win32_helpers.h>
 #include <wil/stl.h>
+#include <wil/win32_helpers.h>
+#include <xorstr.hpp>
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -63,11 +63,10 @@ ExternC const PfnDliHook __pfnDliNotifyHook2 = [](unsigned dliNotify, PDelayLoad
 
   switch (dliNotify) {
     case dliNotePreLoadLibrary: {
-      NtTestAlert();
       const auto module = pe::instance_module();
       if (!_stricmp(pdli->szDll, module->export_directory()->name())) {
-        std::wstring result;
-        if (SUCCEEDED(wil::GetSystemDirectoryW(result))) {
+        NtTestAlert();
+        if (std::wstring result; SUCCEEDED(wil::GetSystemDirectoryW(result))) {
           const auto path = fs::path(result).append(pdli->szDll);
           return (FARPROC)LoadLibraryExW(path.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
         }
