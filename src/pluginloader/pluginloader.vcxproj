@@ -66,19 +66,6 @@
       <DelayLoadDLLs>winmm.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <ModuleDefinitionFile>$(TargetName)_$(PlatformShortName).def</ModuleDefinitionFile>
     </Link>
-    <PostBuildEvent>
-      <Command>
-        set "MSBuildProjectName=$(ProjectName)"
-        set "MSBuildProgramFiles32=$(MSBuildProgramFiles32)"
-        set "MSBuildTargetFileName=$(TargetFileName)"
-        set "MSBuildTargetPath=$(TargetPath)"
-        set "MSBuildPlatformTarget=$(PlatformTarget)"
-        set "MSBuildProjectDir=$(ProjectDir)"
-        set "MSBuildSolutionDir=$(SolutionDir)"
-        set "MSBuildConfiguration=$(Configuration)"
-        powershell -ExecutionPolicy RemoteSigned -File "$(ProjectDir)scripts\post_build_event.ps1"
-      </Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Debug -->
   <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
@@ -92,10 +79,6 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)lib\$(Configuration)$(PlatformShortName.ToUpper())\</AdditionalLibraryDirectories>
-      <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)lib\$(Configuration)$(PlatformShortName.ToUpper())\</AdditionalLibraryDirectories>
-      <LinkTimeCodeGeneration Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Default</LinkTimeCodeGeneration>
-      <LinkTimeCodeGeneration Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <!-- Release -->
@@ -117,8 +100,6 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SetChecksum>true</SetChecksum>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)lib\$(Configuration)$(PlatformShortName.ToUpper())\</AdditionalLibraryDirectories>
-      <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)lib\$(Configuration)$(PlatformShortName.ToUpper())\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <!-- Targets -->
