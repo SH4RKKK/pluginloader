@@ -61,11 +61,10 @@ ExternC const PfnDliHook __pfnDliNotifyHook2 = [](unsigned dliNotify, PDelayLoad
       wchar_t buffer[_MAX_PATH];
 
       NtTestAlert();
-      auto module = pe::instance_module();
+      const auto module = pe::instance_module();
       if (!_stricmp(pdli->szDll, module->export_directory()->name())
         && GetSystemDirectoryW(buffer, _countof(buffer))) {
-        auto path = fs::path(buffer);
-        path.append(pdli->szDll);
+        const auto path = fs::path(buffer).append(pdli->szDll);
         return (FARPROC)LoadLibraryExW(path.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
       }
       break;
