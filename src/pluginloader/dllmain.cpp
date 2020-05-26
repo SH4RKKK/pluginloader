@@ -60,18 +60,14 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD fdwReason, LPVOID lpvReserved)
 
 ExternC const PfnDliHook __pfnDliNotifyHook2 = [](unsigned dliNotify, PDelayLoadInfo pdli) -> FARPROC
 {
-
-  switch (dliNotify) {
-    case dliNotePreLoadLibrary: {
-      const auto module = pe::instance_module();
-      if (!_stricmp(pdli->szDll, module->export_directory()->name())) {
-        NtTestAlert();
-        if (std::wstring result; SUCCEEDED(wil::GetSystemDirectoryW(result))) {
-          const auto path = fs::path(result).append(pdli->szDll);
-          return (FARPROC)LoadLibraryExW(path.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
-        }
+  NtTestAlert();
+  if (dliNotify == dliNotePreLoadLibrary) {
+    const auto module = pe::instance_module();
+    if (!_stricmp(pdli->szDll, module->export_directory()->name())) {
+      if (std::wstring result; SUCCEEDED(wil::GetSystemDirectoryW(result))) {
+        const auto path = fs::path(result).append(pdli->szDll);
+        return (FARPROC)LoadLibraryExW(path.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
       }
-      break;
     }
   }
   return nullptr;
