@@ -2,9 +2,25 @@
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- ProjectConfigurations -->
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugServer|Win32">
+      <Configuration>DebugServer</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugServer|x64">
+      <Configuration>DebugServer</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseServer|Win32">
+      <Configuration>ReleaseServer</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseServer|x64">
+      <Configuration>ReleaseServer</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -42,7 +58,6 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup>
-    <TargetName>winmm</TargetName>
     <GenerateManifest>false</GenerateManifest>
     <EmbedManifest>false</EmbedManifest>
     <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Configuration)$(PlatformShortName.ToUpper())\</OutDir>
@@ -62,13 +77,12 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>ntdll.lib;delayimp.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <DelayLoadDLLs>winmm.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
-      <ModuleDefinitionFile>$(TargetName)_$(PlatformShortName).def</ModuleDefinitionFile>
+      <AdditionalDependencies>ntdll.lib;delayimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <!-- Debug -->
   <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+    <TargetName>winmm</TargetName>
     <UseDebugLibraries>true</UseDebugLibraries>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
@@ -78,10 +92,34 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
+      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <DelayLoadDLLs>WINMM.dll</DelayLoadDLLs>
+      <ModuleDefinitionFile>winmm_$(PlatformShortName).def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <!-- DebugServer -->
+  <PropertyGroup Condition="'$(Configuration)'=='DebugServer'" Label="Configuration">
+    <TargetName>version</TargetName>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='DebugServer'">
+    <ClCompile>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <DelayLoadDLLs>VERSION.dll</DelayLoadDLLs>
+      <ModuleDefinitionFile>version_$(PlatformShortName).def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <!-- Release -->
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <TargetName>winmm</TargetName>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;_UNICODE;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -95,11 +133,41 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
+      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SetChecksum>true</SetChecksum>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <DelayLoadDLLs>WINMM.dll</DelayLoadDLLs>
+      <ModuleDefinitionFile>winmm_$(PlatformShortName).def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <!-- ReleaseServer -->
+  <PropertyGroup Condition="'$(Configuration)'=='ReleaseServer'" Label="Configuration">
+    <TargetName>version</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='ReleaseServer'">
+    <ClCompile>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <UseFullPaths>false</UseFullPaths>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <SetChecksum>true</SetChecksum>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <DelayLoadDLLs>VERSION.dll</DelayLoadDLLs>
+      <ModuleDefinitionFile>version_$(PlatformShortName).def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <!-- Targets -->
