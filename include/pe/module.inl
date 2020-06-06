@@ -138,7 +138,7 @@ namespace pe
     return const_cast<module *>(this)->export_directory();
   }
 
-  inline void *module::find_function(const char *name) const
+  inline void *module::function(const char *name) const
   {
     if ( !name ) return nullptr;
 
@@ -149,7 +149,7 @@ namespace pe
     return nullptr;
   }
 
-  inline void *module::find_function(uint32_t num) const
+  inline void *module::function(uint32_t num) const
   {
     if ( !num ) return nullptr;
 

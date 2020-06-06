@@ -33,8 +33,8 @@ namespace pe
     const class segment *segment(const char* name) const;
     class export_directory *export_directory();
     const class export_directory *export_directory() const;
-    void *find_function(const char *name) const;
-    void *find_function(uint32_t num) const;
+    void *function(const char *name) const;
+    void *function(uint32_t num) const;
   };
   class module *get_module(const wchar_t *name = nullptr);
   class module *get_module_from_address(void *pc);

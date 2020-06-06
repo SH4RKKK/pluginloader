@@ -65,7 +65,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <PreprocessorDefinitions>JM_XORSTR_DISABLE_AVX_INTRINSICS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;FMT_HEADER_ONLY;MAGIC_ENUM_RANGE_MIN=0;MAGIC_ENUM_RANGE_MAX=32;JM_XORSTR_DISABLE_AVX_INTRINSICS;RESULT_DIAGNOSTICS_LEVEL=0</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
