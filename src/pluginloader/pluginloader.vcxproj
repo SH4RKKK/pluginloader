@@ -65,14 +65,14 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <PreprocessorDefinitions>_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;FMT_HEADER_ONLY;MAGIC_ENUM_RANGE_MIN=0;MAGIC_ENUM_RANGE_MAX=32;JM_XORSTR_DISABLE_AVX_INTRINSICS;RESULT_DIAGNOSTICS_LEVEL=0</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;_WINDOWS;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;NOMINMAX;RESULT_DIAGNOSTICS_LEVEL=0;JM_XORSTR_DISABLE_AVX_INTRINSICS</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ObjectFileName>$(IntDir)%(RelativeDir)%(Filename)%(Extension).obj</ObjectFileName>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(SolutionDir)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\pe\include;$(SolutionDir)dependencies\ntapi\include;$(SolutionDir)dependencies\GSL\include;$(SolutionDir)dependencies\xorstr\include;$(SolutionDir)dependencies\wil\include;$(SolutionDir)dependencies\SafeInt;$(SolutionDir)dependencies\processhacker\phnt\include;$(SolutionDir)include</AdditionalIncludeDirectories>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
