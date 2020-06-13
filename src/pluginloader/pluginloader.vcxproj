@@ -72,7 +72,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ObjectFileName>$(IntDir)%(RelativeDir)%(Filename)%(Extension).obj</ObjectFileName>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\pe\include;$(SolutionDir)dependencies\ntapi\include;$(SolutionDir)dependencies\GSL\include;$(SolutionDir)dependencies\xorstr\include;$(SolutionDir)dependencies\wil\include;$(SolutionDir)dependencies\SafeInt;$(SolutionDir)dependencies\processhacker\phnt\include;$(SolutionDir)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\pe\include;$(SolutionDir)dependencies\ntapi\include;$(SolutionDir)dependencies\GSL\include;$(SolutionDir)dependencies\xorstr\include;$(SolutionDir)dependencies\wil\include;$(SolutionDir)dependencies\SafeInt;$(SolutionDir)dependencies\processhacker\phnt\include;$(SolutionDir)dependencies\Detours\src;$(SolutionDir)include</AdditionalIncludeDirectories>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
@@ -87,7 +87,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;_UNICODE;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -105,7 +105,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='DebugServer'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;_UNICODE;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -122,7 +122,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;_UNICODE;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>MaxSpeed</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -149,7 +149,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='ReleaseServer'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;_UNICODE;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>MaxSpeed</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -177,6 +177,14 @@
   </ImportGroup>
   <!-- Items -->
   <ItemGroup>
+    <ClCompile Include="..\..\dependencies\Detours\src\creatwth.cpp" />
+    <ClCompile Include="..\..\dependencies\Detours\src\detours.cpp" />
+    <ClCompile Include="..\..\dependencies\Detours\src\disasm.cpp" />
+    <ClCompile Include="..\..\dependencies\Detours\src\image.cpp" />
+    <ClCompile Include="..\..\dependencies\Detours\src\modules.cpp" />
     <ClCompile Include="dllmain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pluginsdk.h" />
   </ItemGroup>
 </Project>
