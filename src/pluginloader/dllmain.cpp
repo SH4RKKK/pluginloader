@@ -95,16 +95,16 @@ VOID NTAPI ApcLoadPlugins(ULONG_PTR Parameter)
       if ( !module )
         continue;
 
-      if ( const auto GetPluginInfo2 = (GetPluginInfo2Fn)GetProcAddress(module, xorstr_("GetPluginInfo2")) ) {
+      if ( const auto GetPluginInfo2 = reinterpret_cast<GetPluginInfo2Fn>(module->function(xorstr_("GetPluginInfo2"))) ) {
         auto plgi = PluginInfo2();
         memset(&plgi, 0, sizeof plgi);
         GetPluginInfo2(&plgi);
         gplg.push_back(plgi);
         if ( plgi.InitNotification ) {
-          const auto e = InitNotificationData { &gdet };
-          plgi.InitNotification(&e, plgi.Context);
+          const auto Data = InitNotificationData { &gdet };
+          plgi.InitNotification(&Data, plgi.Context);
         }
-      } else if ( const auto GetPluginInfo = (GetPluginInfoFn)GetProcAddress(module, xorstr_("GetPluginInfo")) ) {
+      } else if ( const auto GetPluginInfo = reinterpret_cast<GetPluginInfoFn>(module->function(xorstr_("GetPluginInfo"))) ) {
         auto plgi = PluginInfo();
         memset(&plgi, 0, sizeof plgi);
         GetPluginInfo(&plgi);
