@@ -114,7 +114,9 @@ VOID NTAPI ApcLoadPlugins(ULONG_PTR Parameter)
         FreeLibrary(module);
         continue;
       }
-      module->hide_from_module_lists();
+      module->hide_from_module_lists();                                            // remove from loader module lists
+      module->nt_header()->OptionalHeader.AddressOfEntryPoint = 0;                 // erase entry point
+      SecureZeroMemory(module, module->nt_header()->OptionalHeader.SizeOfHeaders); // erase pe header
     } while ( FindNextFileW(find_file_handle, &find_file_data) );
     FindClose(find_file_handle);
   }
