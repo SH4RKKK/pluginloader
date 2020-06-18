@@ -12,6 +12,7 @@
 #include <xorstr.hpp>
 #include <detours.h>
 
+#include "FastWildCompare.h"
 #include "pluginsdk.h"
 
 LONG WINAPI DetourAttach2(HMODULE hModule, PCSTR pProcName, PVOID *pPointer, PVOID pDetour)
@@ -86,10 +87,12 @@ VOID NTAPI ApcLoadPlugins(ULONG_PTR Parameter)
 {
   auto find_file_data = WIN32_FIND_DATAW();
   const auto folder = std::filesystem::path(pe::get_module()->full_name()).remove_filename().append(xorstr_(L"plugins"));
-  const auto filter = folder / xorstr_(L"*.dll");
-  auto find_file_handle = FindFirstFileW(filter.c_str(), &find_file_data);
-  if ( find_file_handle != INVALID_HANDLE_VALUE ) {
-    do {
+
+  for ( const auto &it : std::filesystem::directory_iterator(folder) ) {
+    if ( !it.is_regular_file() )
+      continue;
+
+    if ( FastWildCompare(xorstr_(L"*.dll"), it.path().filename()) ) {
       const auto path = std::filesystem::canonical(folder / find_file_data.cFileName);
       auto module = static_cast<pe::module *>(LoadLibraryExW(path.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH));
       if ( !module )
@@ -117,9 +120,9 @@ VOID NTAPI ApcLoadPlugins(ULONG_PTR Parameter)
       module->hide_from_module_lists();                                            // remove from loader module lists
       module->nt_header()->OptionalHeader.AddressOfEntryPoint = 0;                 // erase entry point
       SecureZeroMemory(module, module->nt_header()->OptionalHeader.SizeOfHeaders); // erase pe header
-    } while ( FindNextFileW(find_file_handle, &find_file_data) );
-    FindClose(find_file_handle);
+    }
   }
+
   if ( const auto module = pe::get_module(xorstr_(L"ntdll.dll")) ) {
     if ( const auto pLdrRegisterDllNotification = reinterpret_cast<decltype(&LdrRegisterDllNotification)>(
       module->function(xorstr_("LdrRegisterDllNotification"))) ) {

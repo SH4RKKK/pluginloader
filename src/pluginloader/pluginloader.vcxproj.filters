@@ -17,9 +17,11 @@
     <ClCompile Include="..\..\dependencies\Detours\src\modules.cpp">
       <Filter>Detours</Filter>
     </ClCompile>
+    <ClCompile Include="FastWildCompare.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pluginsdk.h" />
+    <ClInclude Include="FastWildCompare.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Detours">

@@ -183,8 +183,10 @@
     <ClCompile Include="..\..\dependencies\Detours\src\image.cpp" />
     <ClCompile Include="..\..\dependencies\Detours\src\modules.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="FastWildCompare.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FastWildCompare.h" />
     <ClInclude Include="pluginsdk.h" />
   </ItemGroup>
 </Project>
