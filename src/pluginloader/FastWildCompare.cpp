@@ -1,16 +1,6 @@
 #include "fastwildcompare.h"
 #include <filesystem>
 
-inline bool FastWildCompare(const std::filesystem::path &wild, const std::filesystem::path &tame)
-{
-  return FastWildCompare(wild.c_str(), tame.c_str());
-}
-
-inline bool FastWildCompare(const wchar_t *pWild, const std::filesystem::path &tame)
-{
-  return FastWildCompare(pWild, tame.c_str());
-}
-
 bool FastWildCompare(const wchar_t *pWild, const wchar_t *pTame)
 {
   const wchar_t *pWildSequence; // Points to prospective wild string match after '*'

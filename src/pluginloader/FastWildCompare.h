@@ -19,6 +19,14 @@
 #pragma once
 #include <filesystem>
 
-inline bool FastWildCompare(const std::filesystem::path &wild, const std::filesystem::path &tame);
-inline bool FastWildCompare(const wchar_t *pWild, const std::filesystem::path &tame);
 bool FastWildCompare(const wchar_t *pWild, const wchar_t *pTame);
+
+inline bool FastWildCompare(const std::filesystem::path &wild, const std::filesystem::path &tame)
+{
+  return FastWildCompare(wild.c_str(), tame.c_str());
+}
+
+inline bool FastWildCompare(const wchar_t *pWild, const std::filesystem::path &tame)
+{
+  return FastWildCompare(pWild, tame.c_str());
+}
