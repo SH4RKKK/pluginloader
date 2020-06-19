@@ -11,6 +11,7 @@
 #include <wil/win32_helpers.h>
 #include <xorstr.hpp>
 #include <detours.h>
+#include <ntapi/mprotect.h>
 
 #include "FastWildCompare.h"
 #include "pluginsdk.h"
@@ -94,7 +95,7 @@ VOID NTAPI ApcLoadPlugins(ULONG_PTR Parameter)
 
     if ( FastWildCompare(xorstr_(L"*.dll"), it.path().filename()) ) {
       const auto path = std::filesystem::canonical(folder / find_file_data.cFileName);
-      auto module = static_cast<pe::module *>(LoadLibraryExW(path.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH));
+      auto module = static_cast<pe::module *>(LoadLibraryExW(it.path().c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH));
       if ( !module )
         continue;
 
@@ -117,9 +118,11 @@ VOID NTAPI ApcLoadPlugins(ULONG_PTR Parameter)
         FreeLibrary(module);
         continue;
       }
-      module->hide_from_module_lists();                                            // remove from loader module lists
-      module->nt_header()->OptionalHeader.AddressOfEntryPoint = 0;                 // erase entry point
-      SecureZeroMemory(module, module->nt_header()->OptionalHeader.SizeOfHeaders); // erase pe header
+      module->hide_from_module_lists(); // remove from loader module lists
+      auto ntheader = module->nt_header();
+      
+      if ( auto protect = ntapi::mprotect(module, ntheader->OptionalHeader.SizeOfHeaders, PAGE_READWRITE) )
+        SecureZeroMemory(module, ntheader->OptionalHeader.SizeOfHeaders); // erase pe header
     }
   }
 
