@@ -89,7 +89,8 @@ VOID NTAPI ApcLoadPlugins(ULONG_PTR Parameter)
   auto find_file_data = WIN32_FIND_DATAW();
   const auto folder = std::filesystem::path(pe::get_module()->full_name()).remove_filename().append(xorstr_(L"plugins"));
 
-  for ( const auto &it : std::filesystem::directory_iterator(folder) ) {
+  auto ec = std::error_code();
+  for ( const auto &it : std::filesystem::directory_iterator(folder, ec) ) {
     if ( !it.is_regular_file() )
       continue;
 
