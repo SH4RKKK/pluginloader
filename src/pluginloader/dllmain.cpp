@@ -5,13 +5,15 @@
 #include <filesystem>
 #include <vector>
 
-#include <pe/export_directory.h>
+#include <detours.h>
+#include <ntmm.hpp>
+#include <ntrtl.hpp>
+#include <pe/debug.h>
+#include <pe/exports.h>
 #include <pe/module.h>
 #include <wil/stl.h>
 #include <wil/win32_helpers.h>
 #include <xorstr.hpp>
-#include <detours.h>
-#include <ntapi/mprotect.h>
 
 #include "FastWildCompare.h"
 #include "pluginsdk.h"
@@ -27,7 +29,7 @@ LONG WINAPI DetourAttach2(HMODULE hModule, PCSTR pProcName, PVOID *pPointer, PVO
   return ERROR_PROC_NOT_FOUND;
 }
 
-static const DetoursData gdet = {
+static const DetoursData g_DetoursData = {
   &DetourTransactionBegin,
   &DetourTransactionAbort,
   &DetourTransactionCommit,
@@ -37,7 +39,7 @@ static const DetoursData gdet = {
   &DetourDetach
 };
 
-static std::vector<PluginInfo2> gplg;
+static std::vector<PluginInfo2> g_Plugins;
 
 PVOID g_pvDllNotificationCookie;
 
@@ -45,7 +47,7 @@ VOID CALLBACK DllNotification(ULONG NotificationReason, PLDR_DLL_NOTIFICATION_DA
 {
   switch ( NotificationReason ) {
     case LDR_DLL_NOTIFICATION_REASON_LOADED: {
-      const auto Data = DllNotificationData {
+      const auto Data = DllNotificationData{
         NotificationData->Loaded.Flags,
         NotificationData->Loaded.FullDllName->Buffer,
         (SIZE_T)NotificationData->Loaded.FullDllName->Length >> 1u,
@@ -53,10 +55,10 @@ VOID CALLBACK DllNotification(ULONG NotificationReason, PLDR_DLL_NOTIFICATION_DA
         (SIZE_T)NotificationData->Loaded.BaseDllName->Length >> 1u,
         (HINSTANCE)NotificationData->Loaded.DllBase,
         NotificationData->Loaded.SizeOfImage,
-        &gdet
+        &g_DetoursData
       };
 
-      for ( const auto &plgi : gplg ) {
+      for ( const auto &plgi : g_Plugins ) {
         if ( plgi.DllLoadedNotification )
           plgi.DllLoadedNotification(&Data, plgi.Context);
       }
@@ -64,7 +66,7 @@ VOID CALLBACK DllNotification(ULONG NotificationReason, PLDR_DLL_NOTIFICATION_DA
     }
 
     case LDR_DLL_NOTIFICATION_REASON_UNLOADED: {
-      const auto Data = DllNotificationData {
+      const auto Data = DllNotificationData{
         NotificationData->Unloaded.Flags,
         NotificationData->Unloaded.FullDllName->Buffer,
         (SIZE_T)NotificationData->Unloaded.FullDllName->Length >> 1u,
@@ -72,10 +74,10 @@ VOID CALLBACK DllNotification(ULONG NotificationReason, PLDR_DLL_NOTIFICATION_DA
         (SIZE_T)NotificationData->Unloaded.BaseDllName->Length >> 1u,
         (HINSTANCE)NotificationData->Unloaded.DllBase,
         NotificationData->Unloaded.SizeOfImage,
-        &gdet
+        &g_DetoursData
       };
 
-      for ( const auto &plgi : gplg ) {
+      for ( const auto &plgi : g_Plugins ) {
         if ( plgi.DllUnloadedNotification )
           plgi.DllUnloadedNotification(&Data, plgi.Context);
       }
@@ -86,7 +88,6 @@ VOID CALLBACK DllNotification(ULONG NotificationReason, PLDR_DLL_NOTIFICATION_DA
 
 VOID NTAPI ApcLoadPlugins(ULONG_PTR Parameter)
 {
-  auto find_file_data = WIN32_FIND_DATAW();
   const auto folder = std::filesystem::path(pe::get_module()->full_name()).remove_filename().append(xorstr_(L"plugins"));
 
   auto ec = std::error_code();
@@ -95,41 +96,40 @@ VOID NTAPI ApcLoadPlugins(ULONG_PTR Parameter)
       continue;
 
     if ( FastWildCompare(xorstr_(L"*.dll"), it.path().filename()) ) {
-      const auto path = std::filesystem::canonical(folder / find_file_data.cFileName);
       auto module = static_cast<pe::module *>(LoadLibraryExW(it.path().c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH));
       if ( !module )
         continue;
 
-      if ( const auto GetPluginInfo2 = reinterpret_cast<GetPluginInfo2Fn>(module->function(xorstr_("GetPluginInfo2"))) ) {
-        auto plgi = PluginInfo2();
-        memset(&plgi, 0, sizeof plgi);
-        GetPluginInfo2(&plgi);
-        gplg.push_back(plgi);
-        if ( plgi.InitNotification ) {
-          const auto Data = InitNotificationData { &gdet };
-          plgi.InitNotification(&Data, plgi.Context);
+      if ( const auto GetPluginInfo2 = reinterpret_cast<GetPluginInfo2Fn>(GetProcAddress(module, xorstr_("GetPluginInfo2"))) ) {
+        PluginInfo2 pluginInfo2{};
+        GetPluginInfo2(&pluginInfo2);
+        g_Plugins.push_back(pluginInfo2);
+        if ( pluginInfo2.InitNotification ) {
+          const auto Data = InitNotificationData{ &g_DetoursData };
+          pluginInfo2.InitNotification(&Data, pluginInfo2.Context);
         }
-      } else if ( const auto GetPluginInfo = reinterpret_cast<GetPluginInfoFn>(module->function(xorstr_("GetPluginInfo"))) ) {
-        auto plgi = PluginInfo();
-        memset(&plgi, 0, sizeof plgi);
-        GetPluginInfo(&plgi);
-        if ( plgi.Init )
-          plgi.Init();
+      } else if ( const auto GetPluginInfo = reinterpret_cast<GetPluginInfoFn>(GetProcAddress(module, xorstr_("GetPluginInfo"))) ) {
+        PluginInfo pluginInfo{};
+        GetPluginInfo(&pluginInfo);
+        if ( pluginInfo.Init )
+          pluginInfo.Init();
       } else {
         FreeLibrary(module);
         continue;
       }
-      module->hide_from_module_lists(); // remove from loader module lists
-      auto ntheader = module->nt_header();
-      
-      if ( auto protect = ntapi::mprotect(module, ntheader->OptionalHeader.SizeOfHeaders, PAGE_READWRITE) )
-        SecureZeroMemory(module, ntheader->OptionalHeader.SizeOfHeaders); // erase pe header
+      const auto debug = module->debug();
+      if ( !debug || debug->type() != IMAGE_DEBUG_TYPE_CODEVIEW ) {
+        module->hide_from_module_lists();
+        const auto ntheader = module->nt_header();
+        const nt::mm::protect_memory p{ module, ntheader->OptionalHeader.SizeOfHeaders, PAGE_READWRITE };
+        SecureZeroMemory(module, ntheader->OptionalHeader.SizeOfHeaders);
+      }
     }
   }
 
   if ( const auto module = pe::get_module(xorstr_(L"ntdll.dll")) ) {
     if ( const auto pLdrRegisterDllNotification = reinterpret_cast<decltype(&LdrRegisterDllNotification)>(
-      module->function(xorstr_("LdrRegisterDllNotification"))) ) {
+      GetProcAddress(module, xorstr_("LdrRegisterDllNotification"))) ) {
       pLdrRegisterDllNotification(0, &DllNotification, nullptr, &g_pvDllNotificationCookie);
     }
   }
@@ -146,8 +146,7 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD fdwReason, LPVOID lpvReserved)
 
 ExternC const PfnDliHook __pfnDliNotifyHook2 = [](unsigned dliNotify, PDelayLoadInfo pdli) -> FARPROC {
   if ( dliNotify == dliNotePreLoadLibrary ) {
-    const auto module = pe::instance_module();
-    if ( !_stricmp(pdli->szDll, module->export_directory()->name()) ) {
+    if ( !_stricmp(pdli->szDll, pe::instance_module->exports()->name()) ) {
       NtTestAlert();
       if ( std::wstring result; SUCCEEDED(wil::GetSystemDirectoryW(result)) ) {
         const auto path = std::filesystem::path(result).append(pdli->szDll);

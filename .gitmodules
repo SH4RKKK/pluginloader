@@ -7,9 +7,6 @@
 [submodule "dependencies/xorstr"]
 	path = dependencies/xorstr
 	url = https://github.com/JustasMasiulis/xorstr.git
-[submodule "dependencies/GSL"]
-	path = dependencies/GSL
-	url = https://github.com/Microsoft/GSL.git
 [submodule "dependencies/wil"]
 	path = dependencies/wil
 	url = https://github.com/Microsoft/wil.git

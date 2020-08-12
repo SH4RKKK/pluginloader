@@ -97,6 +97,14 @@
       <DelayLoadDLLs>WINMM.dll</DelayLoadDLLs>
       <ModuleDefinitionFile>winmm_$(PlatformShortName).def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">md "D:\Games\BNS_TW\bin64\"
+copy /Y "$(OutputPath)*" "D:\Games\BNS_TW\bin64\"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">md "D:\Games\BNS_TW\bin\plugins\"
+copy /Y "$(OutputPath)*" "D:\Games\BNS_TW\bin\plugins\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- DebugServer -->
   <PropertyGroup Condition="'$(Configuration)'=='DebugServer'" Label="Configuration">
@@ -115,6 +123,14 @@
       <DelayLoadDLLs>VERSION.dll</DelayLoadDLLs>
       <ModuleDefinitionFile>version_$(PlatformShortName).def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugServer|x64'">md "D:\Games\BNS_TW\bin64\plugins\"
+copy /Y "$(OutputPath)*" "D:\Games\BNS_TW\bin64\plugins\"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugServer|Win32'">md "D:\Games\BNS_TW\bin\plugins\"
+copy /Y "$(OutputPath)*" "D:\Games\BNS_TW\bin\plugins\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Release -->
   <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
@@ -142,6 +158,14 @@
       <DelayLoadDLLs>WINMM.dll</DelayLoadDLLs>
       <ModuleDefinitionFile>winmm_$(PlatformShortName).def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">md "D:\Games\BNS_TW\bin64\plugins\"
+copy /Y "$(OutputPath)*" "D:\Games\BNS_TW\bin64\plugins\"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">md "D:\Games\BNS_TW\bin\plugins\"
+copy /Y "$(OutputPath)*" "D:\Games\BNS_TW\bin\plugins\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- ReleaseServer -->
   <PropertyGroup Condition="'$(Configuration)'=='ReleaseServer'" Label="Configuration">
@@ -169,6 +193,14 @@
       <DelayLoadDLLs>VERSION.dll</DelayLoadDLLs>
       <ModuleDefinitionFile>version_$(PlatformShortName).def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='ReleaseServer|x64'">md "D:\Games\BNS_TW\bin64\plugins\"
+copy /Y "$(OutputPath)*" "D:\Games\BNS_TW\bin64\plugins\"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='ReleaseServer|Win32'">md "D:\Games\BNS_TW\bin\plugins\"
+copy /Y "$(OutputPath)*" "D:\Games\BNS_TW\bin\plugins\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Targets -->
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
